@@ -1,0 +1,579 @@
+   1              		.file	"rtc.c"
+   9              	.Ltext0:
+  10              		.align	2
+  11              		.global	RTCHandler
+  13              	RTCHandler:
+  14              	.LFB2:
+  15              		.file 1 "Src/rtc.c"
+   1:Src/rtc.c     **** /*****************************************************************************
+   2:Src/rtc.c     ****  *   rtc.c:  Realtime clock C file for Philips LPC214x Family Microprocessors
+   3:Src/rtc.c     ****  *
+   4:Src/rtc.c     ****  *   Copyright(C) 2006, Philips Semiconductor
+   5:Src/rtc.c     ****  *   All rights reserved.
+   6:Src/rtc.c     ****  *
+   7:Src/rtc.c     ****  *   History
+   8:Src/rtc.c     ****  *   2005.10.01  ver 1.00    Prelimnary version, first Release
+   9:Src/rtc.c     ****  *
+  10:Src/rtc.c     **** *****************************************************************************/
+  11:Src/rtc.c     **** 
+  12:Src/rtc.c     **** // modified by Martin Thomas
+  13:Src/rtc.c     **** 
+  14:Src/rtc.c     **** #include "LPC214x.h"                        /* LPC21xx definitions */
+  15:Src/rtc.c     **** #include "type.h"
+  16:Src/rtc.c     **** #include "irq.h"
+  17:Src/rtc.c     **** #include "timer.h"
+  18:Src/rtc.c     **** #include "rtc.h"
+  19:Src/rtc.c     **** 
+  20:Src/rtc.c     **** volatile DWORD alarm_on = 0;
+  21:Src/rtc.c     **** 
+  22:Src/rtc.c     **** /*****************************************************************************
+  23:Src/rtc.c     **** ** Function name:		RTCHandler
+  24:Src/rtc.c     **** **
+  25:Src/rtc.c     **** ** Descriptions:		RTC interrupt handler, it executes based on the
+  26:Src/rtc.c     **** **				the alarm setting
+  27:Src/rtc.c     **** **
+  28:Src/rtc.c     **** ** parameters:			None
+  29:Src/rtc.c     **** ** Returned value:		None
+  30:Src/rtc.c     **** ** 
+  31:Src/rtc.c     **** *****************************************************************************/
+  32:Src/rtc.c     **** void RTCHandler (void) __irq 
+  33:Src/rtc.c     **** {  
+  16              	 Function supports interworking.
+  17              		@ args = 0, pretend = 0, frame = 0
+  18              		@ frame_needed = 0, uses_anonymous_args = 0
+  19              		@ link register save eliminated.
+  20              		.loc 1 34 0
+  34:Src/rtc.c     ****     ILR |= ILR_RTCCIF;		/* clear interrupt flag */
+  21              	r2, .L3
+  22 0000 24209FE5 		ldr	r3, [r2, #0]
+  23 0004 003092E5 		orr	r3, r3, #1
+  24 0008 013083E3 		str	r3, [r2, #0]
+  25 000c 003082E5 		.loc 1 37 0
+  35:Src/rtc.c     ****     IENABLE;			/* handles nested interrupt */
+  36:Src/rtc.c     **** 
+  37:Src/rtc.c     ****     alarm_on = 1;
+  26              	r3, .L3+4
+  27 0010 18309FE5 		mov	r2, #1
+  28 0014 0120A0E3 		str	r2, [r3, #0]
+  29 0018 002083E5 		.loc 1 40 0
+  38:Src/rtc.c     **** 
+  39:Src/rtc.c     ****     IDISABLE;
+  40:Src/rtc.c     ****     VICVectAddr = 0;		/* Acknowledge Interrupt */
+  30              		r2, #0
+  31 001c 0020A0E3 		mvn	r3, #0
+  32 0020 0030E0E3 		.loc 1 33 0
+  33              		@ lr needed for prologue
+  34              		.loc 1 40 0
+  35              		str	r2, [r3, #-4047]
+  36 0024 CF2F03E5 		.loc 1 41 0
+  41:Src/rtc.c     **** }
+  37              	.L4:
+  38 0028 1EFF2FE1 		.align	2
+  39              	.L3:
+  40              		.word	-536723456
+  41              		.word	alarm_on
+  42 002c 004002E0 	.LFE2:
+  44              		.align	2
+  45              		.global	RTCInit
+  47              	RTCInit:
+  48              	.LFB3:
+  49              		.loc 1 53 0
+  50              		@ Function supports interworking.
+  42:Src/rtc.c     **** 
+  43:Src/rtc.c     **** /*****************************************************************************
+  44:Src/rtc.c     **** ** Function name:		RTCInit
+  45:Src/rtc.c     **** **
+  46:Src/rtc.c     **** ** Descriptions:		Initialize RTC timer
+  47:Src/rtc.c     **** **
+  48:Src/rtc.c     **** ** parameters:			None
+  49:Src/rtc.c     **** ** Returned value:		None
+  50:Src/rtc.c     **** ** 
+  51:Src/rtc.c     **** *****************************************************************************/
+  52:Src/rtc.c     **** void RTCInit( void )
+  53:Src/rtc.c     **** {
+  51              	retend = 0, frame = 0
+  52              		@ frame_needed = 0, uses_anonymous_args = 0
+  53              		@ link register save eliminated.
+  54              		.loc 1 67 0
+  55              		ldr	r1, .L7
+  54:Src/rtc.c     ****     alarm_on = 0;
+  55:Src/rtc.c     **** 
+  56:Src/rtc.c     **** // mthomas: replaced for 32kHz-XTAL
+  57:Src/rtc.c     **** 
+  58:Src/rtc.c     **** #if 0
+  59:Src/rtc.c     ****     /*--- Initialize registers ---*/    
+  60:Src/rtc.c     ****     AMR = 0;
+  61:Src/rtc.c     ****     CIIR = 0;
+  62:Src/rtc.c     ****     CCR = 0;
+  63:Src/rtc.c     ****     PREINT = PREINT_RTC;
+  64:Src/rtc.c     ****     PREFRAC = PREFRAC_RTC;
+  65:Src/rtc.c     **** #endif	
+  66:Src/rtc.c     **** 
+  67:Src/rtc.c     **** 	AMR = 0;
+  56              	 1 54 0
+  57 0034 4C109FE5 		ldr	r2, .L7+4
+  58              		mov	r3, #0
+  59 0038 4C209FE5 		str	r3, [r2, #0]
+  60 003c 0030A0E3 		.loc 1 67 0
+  61 0040 003082E5 		str	r3, [r1, #16]
+  62              		.loc 1 68 0
+  63 0044 103081E5 		str	r3, [r1, #12]
+  68:Src/rtc.c     ****     CIIR = 0;
+  64              	69 0
+  65 0048 0C3081E5 		str	r3, [r1, #8]
+  69:Src/rtc.c     ****     CCR = 0;
+  66              	loc 1 71 0
+  67 004c 083081E5 		add	r3, r3, #456
+  70:Src/rtc.c     **** 		
+  71:Src/rtc.c     **** 	PREINT = PREINT_RTC;
+  68              	tr	r3, [r1, #128]
+  69 0050 723F83E2 		.loc 1 72 0
+  70 0054 803081E5 		ldr	r3, .L7+8
+  72:Src/rtc.c     **** 	PREFRAC = PREFRAC_RTC;
+  71              	r	r3, [r1, #132]
+  72 0058 30309FE5 		.loc 1 74 0
+  73 005c 843081E5 		mov	r3, #1
+  73:Src/rtc.c     **** 	
+  74:Src/rtc.c     **** 	CCR = CCR_CLKEN;  /* disabale CTC-Reset and enable clock with CLKEN */
+  74              	r	r3, [r1, #8]
+  75 0060 0130A0E3 		.loc 1 75 0
+  76 0064 083081E5 		ldr	r3, [r1, #8]
+  75:Src/rtc.c     **** 	CCR |= CCR_CLKSRC; // LPC213x: switch to 32kHz XTAL:
+  77              	r	r3, r3, #16
+  78 0068 083091E5 		str	r3, [r1, #8]
+  79 006c 103083E3 		.loc 1 77 0
+  80 0070 083081E5 		ldr	r2, .L7+12
+  76:Src/rtc.c     **** 	// LPC213x: disconnect RTC from System-Clock (=connect to 32kHz)
+  77:Src/rtc.c     **** 	PCONP &= ~(1UL<<9);
+  81              		r3, [r2, #196]
+  82 0074 18209FE5 		bic	r3, r3, #512
+  83 0078 C43092E5 		.loc 1 53 0
+  84 007c 023CC3E3 		@ lr needed for prologue
+  85              		.loc 1 77 0
+  86              		str	r3, [r2, #196]
+  87              		.loc 1 80 0
+  88 0080 C43082E5 		bx	lr
+  78:Src/rtc.c     **** 	
+  79:Src/rtc.c     ****     return;
+  80:Src/rtc.c     **** }
+  89              	lign	2
+  90 0084 1EFF2FE1 	.L7:
+  91              		.word	-536723456
+  92              		.word	alarm_on
+  93              		.word	25024
+  94 0088 004002E0 		.word	-534790144
+  95 008c 00000000 	.LFE3:
+  97 0094 00C01FE0 		.align	2
+  98              		.global	RTCStart
+ 100              	RTCStart:
+ 101              	.LFB4:
+ 102              		.loc 1 92 0
+ 103              		@ Function supports interworking.
+ 104              		@ args = 0, pretend = 0, frame = 0
+  81:Src/rtc.c     **** 
+  82:Src/rtc.c     **** /*****************************************************************************
+  83:Src/rtc.c     **** ** Function name:		RTCStart
+  84:Src/rtc.c     **** **
+  85:Src/rtc.c     **** ** Descriptions:		Start RTC timer
+  86:Src/rtc.c     **** **
+  87:Src/rtc.c     **** ** parameters:			None
+  88:Src/rtc.c     **** ** Returned value:		None
+  89:Src/rtc.c     **** ** 
+  90:Src/rtc.c     **** *****************************************************************************/
+  91:Src/rtc.c     **** void RTCStart( void ) 
+  92:Src/rtc.c     **** {
+ 105              	= 0, uses_anonymous_args = 0
+ 106              		@ link register save eliminated.
+ 107              		.loc 1 94 0
+ 108              		ldr	r3, .L11
+ 109              		ldr	r2, [r3, #8]
+  93:Src/rtc.c     ****     /*--- Start RTC counters ---*/
+  94:Src/rtc.c     ****     CCR |= CCR_CLKEN;
+ 110              	r2, r2, #1
+ 111 0098 14309FE5 		str	r2, [r3, #8]
+ 112 009c 082093E5 		.loc 1 95 0
+ 113 00a0 012082E3 		mov	r2, #1
+ 114 00a4 082083E5 		.loc 1 92 0
+  95:Src/rtc.c     ****     ILR = ILR_RTCCIF;
+ 115              	 needed for prologue
+ 116 00a8 0120A0E3 		.loc 1 95 0
+ 117              		str	r2, [r3, #0]
+ 118              		.loc 1 97 0
+ 119              		bx	lr
+ 120 00ac 002083E5 	.L12:
+  96:Src/rtc.c     ****     return;
+  97:Src/rtc.c     **** }
+ 121              	n	2
+ 122 00b0 1EFF2FE1 	.L11:
+ 123              		.word	-536723456
+ 124              	.LFE4:
+ 126 00b4 004002E0 		.align	2
+ 127              		.global	RTCStop
+ 129              	RTCStop:
+ 130              	.LFB5:
+ 131              		.loc 1 109 0
+ 132              		@ Function supports interworking.
+ 133              		@ args = 0, pretend = 0, frame = 0
+  98:Src/rtc.c     **** 
+  99:Src/rtc.c     **** /*****************************************************************************
+ 100:Src/rtc.c     **** ** Function name:		RTCStop
+ 101:Src/rtc.c     **** **
+ 102:Src/rtc.c     **** ** Descriptions:		Stop RTC timer
+ 103:Src/rtc.c     **** **
+ 104:Src/rtc.c     **** ** parameters:			None
+ 105:Src/rtc.c     **** ** Returned value:		None
+ 106:Src/rtc.c     **** ** 
+ 107:Src/rtc.c     **** *****************************************************************************/
+ 108:Src/rtc.c     **** void RTCStop( void )
+ 109:Src/rtc.c     **** {   
+ 134              	ed = 0, uses_anonymous_args = 0
+ 135              		@ link register save eliminated.
+ 136              		.loc 1 111 0
+ 137              		ldr	r2, .L15
+ 138              		ldr	r3, [r2, #8]
+ 110:Src/rtc.c     ****     /*--- Stop RTC counters ---*/
+ 111:Src/rtc.c     ****     CCR &= ~CCR_CLKEN;
+ 139              	r3, r3, #1
+ 140 00b8 0C209FE5 		.loc 1 109 0
+ 141 00bc 083092E5 		@ lr needed for prologue
+ 142 00c0 0130C3E3 		.loc 1 111 0
+ 143              		str	r3, [r2, #8]
+ 144              		.loc 1 113 0
+ 145              		bx	lr
+ 146 00c4 083082E5 	.L16:
+ 112:Src/rtc.c     ****     return;
+ 113:Src/rtc.c     **** } 
+ 147              	2
+ 148 00c8 1EFF2FE1 	.L15:
+ 149              		.word	-536723456
+ 150              	.LFE5:
+ 152 00cc 004002E0 		.align	2
+ 153              		.global	RTC_CTCReset
+ 155              	RTC_CTCReset:
+ 156              	.LFB6:
+ 157              		.loc 1 125 0
+ 158              		@ Function supports interworking.
+ 159              		@ args = 0, pretend = 0, frame = 0
+ 114:Src/rtc.c     **** 
+ 115:Src/rtc.c     **** /*****************************************************************************
+ 116:Src/rtc.c     **** ** Function name:		RTC_CTCReset
+ 117:Src/rtc.c     **** **
+ 118:Src/rtc.c     **** ** Descriptions:		Reset RTC clock tick counter
+ 119:Src/rtc.c     **** **
+ 120:Src/rtc.c     **** ** parameters:			None
+ 121:Src/rtc.c     **** ** Returned value:		None
+ 122:Src/rtc.c     **** ** 
+ 123:Src/rtc.c     **** *****************************************************************************/
+ 124:Src/rtc.c     **** void RTC_CTCReset( void )
+ 125:Src/rtc.c     **** {   
+ 160              	ed = 0, uses_anonymous_args = 0
+ 161              		@ link register save eliminated.
+ 162              		.loc 1 127 0
+ 163              		ldr	r2, .L19
+ 164              		ldr	r3, [r2, #8]
+ 126:Src/rtc.c     ****     /*--- Reset CTC ---*/
+ 127:Src/rtc.c     ****     CCR |= CCR_CTCRST;
+ 165              	r3, r3, #2
+ 166 00d0 0C209FE5 		.loc 1 125 0
+ 167 00d4 083092E5 		@ lr needed for prologue
+ 168 00d8 023083E3 		.loc 1 127 0
+ 169              		str	r3, [r2, #8]
+ 170              		.loc 1 129 0
+ 171              		bx	lr
+ 172 00dc 083082E5 	.L20:
+ 128:Src/rtc.c     ****     return;
+ 129:Src/rtc.c     **** }
+ 173              	2
+ 174 00e0 1EFF2FE1 	.L19:
+ 175              		.word	-536723456
+ 176              	.LFE6:
+ 178 00e4 004002E0 		.align	2
+ 179              		.global	RTCSetTime
+ 181              	RTCSetTime:
+ 182              	.LFB7:
+ 183              		.loc 1 141 0
+ 184              		@ Function supports interworking.
+ 185              		@ args = 32, pretend = 16, frame = 0
+ 130:Src/rtc.c     **** 
+ 131:Src/rtc.c     **** /*****************************************************************************
+ 132:Src/rtc.c     **** ** Function name:		RTCSetTime
+ 133:Src/rtc.c     **** **
+ 134:Src/rtc.c     **** ** Descriptions:		Setup RTC timer value
+ 135:Src/rtc.c     **** **
+ 136:Src/rtc.c     **** ** parameters:			None
+ 137:Src/rtc.c     **** ** Returned value:		None
+ 138:Src/rtc.c     **** ** 
+ 139:Src/rtc.c     **** *****************************************************************************/
+ 140:Src/rtc.c     **** void RTCSetTime( RTCTime Time ) 
+ 141:Src/rtc.c     **** {
+ 186              	ed = 0, uses_anonymous_args = 0
+ 187              		sub	sp, sp, #16
+ 188              	.LCFI0:
+ 189              		stmfd	sp!, {r4, r5, r6, lr}
+ 190 00e8 10D04DE2 	.LCFI1:
+ 191              		.loc 1 141 0
+ 192 00ec 70402DE9 		add	ip, sp, #16
+ 193              		stmia	ip, {r0, r1, r2, r3}
+ 194              		add	r5, sp, #32
+ 195 00f0 10C08DE2 		ldmia	r5, {r5, r6}	@ phole ldm
+ 196 00f4 0F008CE8 		ldr	r4, [sp, #44]
+ 197 00f8 20508DE2 		ldr	lr, [sp, #40]
+ 198 00fc 600095E8 		add	r0, sp, #24
+ 199 0100 2C409DE5 		ldmia	r0, {r0, ip}	@ phole ldm
+ 200 0104 28E09DE5 		ldr	r1, [sp, #20]
+ 201 0108 18008DE2 		.loc 1 142 0
+ 202 010c 011090E8 		ldr	r3, .L23
+ 203 0110 14109DE5 		ldr	r2, [sp, #16]
+ 142:Src/rtc.c     ****     SEC = Time.RTC_Sec;
+ 204              	
+ 205 0114 2C309FE5 		.loc 1 143 0
+ 206 0118 10209DE5 		str	r1, [r3, #36]
+ 207 011c 202083E5 		.loc 1 144 0
+ 143:Src/rtc.c     ****     MIN = Time.RTC_Min;
+ 208              	r	r0, [r3, #40]
+ 209 0120 241083E5 		.loc 1 145 0
+ 144:Src/rtc.c     ****     HOUR = Time.RTC_Hour;
+ 210              	tr	ip, [r3, #44]
+ 211 0124 280083E5 		.loc 1 146 0
+ 145:Src/rtc.c     ****     DOM = Time.RTC_Mday;
+ 212              	tr	lr, [r3, #48]
+ 213 0128 2CC083E5 		.loc 1 147 0
+ 146:Src/rtc.c     ****     DOW = Time.RTC_Wday;
+ 214              	tr	r4, [r3, #52]
+ 215 012c 30E083E5 		.loc 1 148 0
+ 147:Src/rtc.c     ****     DOY = Time.RTC_Yday;
+ 216              	tr	r5, [r3, #56]
+ 217 0130 344083E5 		.loc 1 149 0
+ 148:Src/rtc.c     ****     MONTH = Time.RTC_Mon;
+ 218              	tr	r6, [r3, #60]
+ 219 0134 385083E5 		.loc 1 151 0
+ 149:Src/rtc.c     ****     YEAR = Time.RTC_Year;    
+ 220              	dmfd	sp!, {r4, r5, r6, lr}
+ 221 0138 3C6083E5 		add	sp, sp, #16
+ 150:Src/rtc.c     ****     return;
+ 151:Src/rtc.c     **** }
+ 222              	x	lr
+ 223 013c 7040BDE8 	.L24:
+ 224 0140 10D08DE2 		.align	2
+ 225 0144 1EFF2FE1 	.L23:
+ 226              		.word	-536723456
+ 227              	.LFE7:
+ 229 0148 004002E0 		.align	2
+ 230              		.global	RTCSetAlarm
+ 232              	RTCSetAlarm:
+ 233              	.LFB8:
+ 234              		.loc 1 163 0
+ 235              		@ Function supports interworking.
+ 236              		@ args = 32, pretend = 16, frame = 0
+ 152:Src/rtc.c     **** 
+ 153:Src/rtc.c     **** /*****************************************************************************
+ 154:Src/rtc.c     **** ** Function name:		RTCSetAlarm
+ 155:Src/rtc.c     **** **
+ 156:Src/rtc.c     **** ** Descriptions:		Initialize RTC timer
+ 157:Src/rtc.c     **** **
+ 158:Src/rtc.c     **** ** parameters:			None
+ 159:Src/rtc.c     **** ** Returned value:		None
+ 160:Src/rtc.c     **** ** 
+ 161:Src/rtc.c     **** *****************************************************************************/
+ 162:Src/rtc.c     **** void RTCSetAlarm( RTCTime Alarm ) 
+ 163:Src/rtc.c     **** {   
+ 237              	 = 0, uses_anonymous_args = 0
+ 238              		sub	sp, sp, #16
+ 239              	.LCFI2:
+ 240              		stmfd	sp!, {r4, r5, r6, lr}
+ 241 014c 10D04DE2 	.LCFI3:
+ 242              		.loc 1 163 0
+ 243 0150 70402DE9 		add	ip, sp, #16
+ 244              		stmia	ip, {r0, r1, r2, r3}
+ 245              		add	r5, sp, #32
+ 246 0154 10C08DE2 		ldmia	r5, {r5, r6}	@ phole ldm
+ 247 0158 0F008CE8 		ldr	r4, [sp, #44]
+ 248 015c 20508DE2 		ldr	lr, [sp, #40]
+ 249 0160 600095E8 		add	r0, sp, #24
+ 250 0164 2C409DE5 		ldmia	r0, {r0, ip}	@ phole ldm
+ 251 0168 28E09DE5 		ldr	r1, [sp, #20]
+ 252 016c 18008DE2 		.loc 1 164 0
+ 253 0170 011090E8 		ldr	r3, .L27
+ 254 0174 14109DE5 		ldr	r2, [sp, #16]
+ 164:Src/rtc.c     ****     ALSEC = Alarm.RTC_Sec;
+ 255              	
+ 256 0178 2C309FE5 		.loc 1 165 0
+ 257 017c 10209DE5 		str	r1, [r3, #100]
+ 258 0180 602083E5 		.loc 1 166 0
+ 165:Src/rtc.c     ****     ALMIN = Alarm.RTC_Min;
+ 259              	r	r0, [r3, #104]
+ 260 0184 641083E5 		.loc 1 167 0
+ 166:Src/rtc.c     ****     ALHOUR = Alarm.RTC_Hour;
+ 261              	tr	ip, [r3, #108]
+ 262 0188 680083E5 		.loc 1 168 0
+ 167:Src/rtc.c     ****     ALDOM = Alarm.RTC_Mday;
+ 263              	tr	lr, [r3, #112]
+ 264 018c 6CC083E5 		.loc 1 169 0
+ 168:Src/rtc.c     ****     ALDOW = Alarm.RTC_Wday;
+ 265              	tr	r4, [r3, #116]
+ 266 0190 70E083E5 		.loc 1 170 0
+ 169:Src/rtc.c     ****     ALDOY = Alarm.RTC_Yday;
+ 267              	tr	r5, [r3, #120]
+ 268 0194 744083E5 		.loc 1 171 0
+ 170:Src/rtc.c     ****     ALMON = Alarm.RTC_Mon;
+ 269              	tr	r6, [r3, #124]
+ 270 0198 785083E5 		.loc 1 173 0
+ 171:Src/rtc.c     ****     ALYEAR = Alarm.RTC_Year;    
+ 271              	dmfd	sp!, {r4, r5, r6, lr}
+ 272 019c 7C6083E5 		add	sp, sp, #16
+ 172:Src/rtc.c     ****     return;
+ 173:Src/rtc.c     **** }
+ 273              	x	lr
+ 274 01a0 7040BDE8 	.L28:
+ 275 01a4 10D08DE2 		.align	2
+ 276 01a8 1EFF2FE1 	.L27:
+ 277              		.word	-536723456
+ 278              	.LFE8:
+ 280 01ac 004002E0 		.align	2
+ 281              		.global	RTCGetTime
+ 283              	RTCGetTime:
+ 284              	.LFB9:
+ 285              		.loc 1 185 0
+ 286              		@ Function supports interworking.
+ 287              		@ args = 0, pretend = 0, frame = 0
+ 174:Src/rtc.c     **** 
+ 175:Src/rtc.c     **** /*****************************************************************************
+ 176:Src/rtc.c     **** ** Function name:		RTCGetTime
+ 177:Src/rtc.c     **** **
+ 178:Src/rtc.c     **** ** Descriptions:		Get RTC timer value
+ 179:Src/rtc.c     **** **
+ 180:Src/rtc.c     **** ** parameters:			None
+ 181:Src/rtc.c     **** ** Returned value:		The data structure of the RTC time table
+ 182:Src/rtc.c     **** ** 
+ 183:Src/rtc.c     **** *****************************************************************************/
+ 184:Src/rtc.c     **** RTCTime RTCGetTime( void ) 
+ 185:Src/rtc.c     **** {
+ 288              	 = 0, uses_anonymous_args = 0
+ 289              		stmfd	sp!, {r4, r5, r6, r7, lr}
+ 290              	.LCFI4:
+ 291              		.loc 1 188 0
+ 292 01b0 F0402DE9 		ldr	r3, .L31
+ 293              		ldr	lr, [r3, #32]
+ 186:Src/rtc.c     ****     RTCTime LocalTime;
+ 187:Src/rtc.c     ****     
+ 188:Src/rtc.c     ****     LocalTime.RTC_Sec = SEC;
+ 294              	1 189 0
+ 295 01b4 44309FE5 		ldr	r7, [r3, #36]
+ 296 01b8 20E093E5 		.loc 1 190 0
+ 189:Src/rtc.c     ****     LocalTime.RTC_Min = MIN;
+ 297              	r	r6, [r3, #40]
+ 298 01bc 247093E5 		.loc 1 191 0
+ 190:Src/rtc.c     ****     LocalTime.RTC_Hour = HOUR;
+ 299              	dr	r5, [r3, #44]
+ 300 01c0 286093E5 		.loc 1 192 0
+ 191:Src/rtc.c     ****     LocalTime.RTC_Mday = DOM;
+ 301              	dr	r4, [r3, #48]
+ 302 01c4 2C5093E5 		.loc 1 193 0
+ 192:Src/rtc.c     ****     LocalTime.RTC_Wday = DOW;
+ 303              	dr	ip, [r3, #52]
+ 304 01c8 304093E5 		.loc 1 194 0
+ 193:Src/rtc.c     ****     LocalTime.RTC_Yday = DOY;
+ 305              	dr	r1, [r3, #56]
+ 306 01cc 34C093E5 		.loc 1 195 0
+ 194:Src/rtc.c     ****     LocalTime.RTC_Mon = MONTH;
+ 307              	dr	r2, [r3, #60]
+ 308 01d0 381093E5 		.loc 1 196 0
+ 195:Src/rtc.c     ****     LocalTime.RTC_Year = YEAR;
+ 309              	tr	lr, [r0, #0]
+ 310 01d4 3C2093E5 		str	r2, [r0, #20]
+ 196:Src/rtc.c     ****     return LocalTime;    
+ 311              	tr	r1, [r0, #16]
+ 312 01d8 00E080E5 		str	ip, [r0, #28]
+ 313 01dc 142080E5 		str	r4, [r0, #24]
+ 314 01e0 101080E5 		str	r5, [r0, #12]
+ 315 01e4 1CC080E5 		str	r6, [r0, #8]
+ 316 01e8 184080E5 		str	r7, [r0, #4]
+ 317 01ec 0C5080E5 		.loc 1 197 0
+ 318 01f0 086080E5 		ldmfd	sp!, {r4, r5, r6, r7, lr}
+ 319 01f4 047080E5 		bx	lr
+ 197:Src/rtc.c     **** }
+ 320              	lign	2
+ 321 01f8 F040BDE8 	.L31:
+ 322 01fc 1EFF2FE1 		.word	-536723456
+ 323              	.LFE9:
+ 325              		.align	2
+ 326 0200 004002E0 		.global	RTCSetAlarmMask
+ 328              	RTCSetAlarmMask:
+ 329              	.LFB10:
+ 330              		.loc 1 209 0
+ 331              		@ Function supports interworking.
+ 332              		@ args = 0, pretend = 0, frame = 0
+ 333              		@ frame_needed = 0, uses_anonymous_args = 0
+ 198:Src/rtc.c     **** 
+ 199:Src/rtc.c     **** /*****************************************************************************
+ 200:Src/rtc.c     **** ** Function name:		RTCSetAlarmMask
+ 201:Src/rtc.c     **** **
+ 202:Src/rtc.c     **** ** Descriptions:		Set RTC timer alarm mask
+ 203:Src/rtc.c     **** **
+ 204:Src/rtc.c     **** ** parameters:			Alarm mask setting
+ 205:Src/rtc.c     **** ** Returned value:		None
+ 206:Src/rtc.c     **** ** 
+ 207:Src/rtc.c     **** *****************************************************************************/
+ 208:Src/rtc.c     **** void RTCSetAlarmMask( DWORD AlarmMask ) 
+ 209:Src/rtc.c     **** {
+ 334              	er save eliminated.
+ 335              	.LVL0:
+ 336              		.loc 1 211 0
+ 337              		ldr	r3, .L35
+ 338              		.loc 1 209 0
+ 339              		@ lr needed for prologue
+ 210:Src/rtc.c     ****     /*--- Set alarm mask ---*/    
+ 211:Src/rtc.c     ****     AMR = AlarmMask;
+ 340              	1 211 0
+ 341 0204 04309FE5 		str	r0, [r3, #16]
+ 342              		.loc 1 213 0
+ 343              		bx	lr
+ 344              	.L36:
+ 345 0208 100083E5 		.align	2
+ 212:Src/rtc.c     ****     return;
+ 213:Src/rtc.c     **** }
+ 346              		.word	-536723456
+ 347 020c 1EFF2FE1 	.LFE10:
+ 349              		.global	alarm_on
+ 350              		.bss
+ 351 0210 004002E0 		.align	2
+ 354              	alarm_on:
+ 355              		.space	4
+ 356              		.section	.debug_frame,"",%progbits
+ 357              	.Lframe0:
+ 358              		.4byte	.LECIE0-.LSCIE0
+ 359              	.LSCIE0:
+ 360 0000 00000000 		.4byte	0xffffffff
+ 497              		.4byte	.LCFI0-.Ltext0
+DEFINED SYMBOLS
+                            *ABS*:00000000 rtc.c
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:13     .text:00000000 RTCHandler
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:22     .text:00000000 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:42     .text:0000002c $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:359    .bss:00000000 alarm_on
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:49     .text:00000034 RTCInit
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:57     .text:00000034 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:94     .text:00000088 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:103    .text:00000098 RTCStart
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:111    .text:00000098 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:126    .text:000000b4 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:132    .text:000000b8 RTCStop
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:140    .text:000000b8 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:152    .text:000000cc $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:158    .text:000000d0 RTC_CTCReset
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:166    .text:000000d0 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:178    .text:000000e4 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:184    .text:000000e8 RTCSetTime
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:190    .text:000000e8 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:229    .text:00000148 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:235    .text:0000014c RTCSetAlarm
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:241    .text:0000014c $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:280    .text:000001ac $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:286    .text:000001b0 RTCGetTime
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:292    .text:000001b0 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:326    .text:00000200 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:332    .text:00000204 RTCSetAlarmMask
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:341    .text:00000204 $a
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccKqaaaa.s:351    .text:00000210 $d
+
+NO UNDEFINED SYMBOLS

@@ -1,0 +1,168 @@
+   1              		.code	16
+   2              		.file	"main.c"
+  10              	.Ltext0:
+  11              		.align	2
+  12              		.global	digitalWrite
+  13              		.code 16
+  14              		.thumb_func
+  16              	digitalWrite:
+  17              	.LFB3:
+  18              		.file 1 "Src/main.c"
+   1:Src/main.c    **** //Main c source code
+   2:Src/main.c    **** 
+   3:Src/main.c    **** #include <stdafx.h>
+   4:Src/main.c    **** 
+   5:Src/main.c    **** 
+   6:Src/main.c    **** int main(){	
+   7:Src/main.c    **** 	
+   8:Src/main.c    **** 	DWORD counter = 0;	
+   9:Src/main.c    **** 	timer_counter = counter;
+  10:Src/main.c    **** 	init_VIC();				//initiate vector interrupted control regs.
+  11:Src/main.c    **** 	init_timer();			// init timers for delays.
+  12:Src/main.c    **** 		
+  13:Src/main.c    **** 	/* Initialize timer for GPIO toggling timing */
+  14:Src/main.c    **** 	enable_timer( 0 );
+  15:Src/main.c    **** 	
+  16:Src/main.c    **** 	//set gpios direction
+  17:Src/main.c    **** 	IODIR0 |= (1 << 8 );	// set p0.8 pin as output.	
+  18:Src/main.c    **** 	IOSET0 |= ( 1 << 8 );	//set p0.8 pin as high. 3.3v
+  19:Src/main.c    **** 	while( 1 ){
+  20:Src/main.c    **** 		
+  21:Src/main.c    **** 		while( !((timer_counter - counter) == 1) );
+  22:Src/main.c    **** 		pinState = !pinState;
+  23:Src/main.c    **** 		digitalWrite( pinState );
+  24:Src/main.c    **** 		counter = timer_counter;
+  25:Src/main.c    **** 	}
+  26:Src/main.c    **** 	return 0;
+  27:Src/main.c    **** }
+  28:Src/main.c    **** 
+  29:Src/main.c    **** int digitalWrite( DWORD state ){
+  19              	:
+  20              		@ lr needed for prologue
+  21              		.loc 1 30 0
+  30:Src/main.c    **** 	switch( state ){
+  22              	p	r0, #0
+  23 0000 0028     		beq	.L3
+  24 0002 02D0     		cmp	r0, #1
+  25 0004 0128     		bne	.L2
+  26 0006 08D1     		b	.L4
+  27 0008 01E0     	.L3:
+  28              		.loc 1 32 0
+  31:Src/main.c    **** 		case 0:
+  32:Src/main.c    **** 			IOCLR0 |= ( 1<< 8 );
+  29              	, .L7
+  30 000a 0549     		b	.L6
+  31 000c 00E0     	.L4:
+  32              		.loc 1 35 0
+  33:Src/main.c    **** 		break;
+  34:Src/main.c    **** 		case 1:
+  35:Src/main.c    **** 			IOSET0 |= ( 1 << 8 );
+  33              		r1, .L7+4
+  34 000e 0549     	.L6:
+  35              		ldr	r2, [r1]
+  36 0010 0A68     		mov	r3, #128
+  37 0012 8023     		lsl	r3, r3, #1
+  38 0014 5B00     		orr	r2, r2, r3
+  39 0016 1A43     		str	r2, [r1]
+  40 0018 0A60     	.L2:
+  41              		.loc 1 39 0
+  36:Src/main.c    **** 		break;
+  37:Src/main.c    **** 	}
+  38:Src/main.c    **** 	return 0;
+  39:Src/main.c    **** }
+  42              	#0
+  43 001a 0020     	.LVL1:
+  44              		@ sp needed for prologue
+  45              		bx	lr
+  46 001c 7047     	.L8:
+  47              		.align	2
+  48 001e 0000     	.L7:
+  49              		.word	-536707060
+  50 0020 0C8002E0 		.word	-536707068
+  51 0024 048002E0 	.LFE3:
+  53              		.align	2
+  54              		.global	main
+  55              		.code 16
+  56              		.thumb_func
+  58              	main:
+  59              	.LFB2:
+  60              		.loc 1 6 0
+  61              		push	{r4, lr}
+  62 0028 10B5     	.LCFI0:
+  63              		.loc 1 9 0
+  64              		ldr	r2, .L20
+  65 002a 124A     		mov	r3, #0
+  66 002c 0023     		str	r3, [r2]
+  67 002e 1360     		.loc 1 10 0
+  68              		bl	init_VIC
+  69 0030 FFF7FEFF 		.loc 1 11 0
+  70              		bl	init_timer
+  71 0034 FFF7FEFF 		.loc 1 14 0
+  72              		mov	r0, #0
+  73 0038 0020     		bl	enable_timer
+  74 003a FFF7FEFF 		.loc 1 17 0
+  75              		ldr	r1, .L20+4
+  76 003e 0E49     		mov	r2, #128
+  77 0040 8022     		ldr	r3, [r1]
+  78 0042 0B68     		lsl	r2, r2, #1
+  79 0044 5200     		orr	r3, r3, r2
+  80 0046 1343     		str	r3, [r1]
+  81 0048 0B60     		.loc 1 18 0
+  82              		sub	r1, r1, #4
+  83 004a 0439     		ldr	r3, [r1]
+  84 004c 0B68     		orr	r3, r3, r2
+  85 004e 1343     		str	r3, [r1]
+  86 0050 0B60     		mov	r2, #0
+  87 0052 0022     	.LVL2:
+  88              	.L19:
+  89              		.loc 1 21 0
+  90              		ldr	r4, .L20
+  91 0054 074C     		ldr	r3, [r4]
+  92 0056 2368     		sub	r3, r3, r2
+  93 0058 9B1A     		cmp	r3, #1
+  94 005a 012B     		bne	.L19
+  95 005c FAD1     		.loc 1 22 0
+  96              		ldr	r2, .L20+8
+  97 005e 074A     	.LVL3:
+  98              		ldr	r3, [r2]
+  99 0060 1368     		mov	r0, #0
+ 100 0062 0020     		cmp	r3, #0
+ 101 0064 002B     		bne	.L12
+ 102 0066 00D1     		mov	r0, #1
+ 103 0068 0120     	.L12:
+ 104              		str	r0, [r2]
+ 105 006a 1060     		.loc 1 23 0
+ 106              		bl	digitalWrite
+ 107 006c FFF7FEFF 		.loc 1 24 0
+ 108              		ldr	r2, [r4]
+ 109 0070 2268     	.LVL4:
+ 110              		b	.L19
+ 111 0072 EFE7     	.L21:
+ 112              		.align	2
+ 113              	.L20:
+ 114              		.word	timer_counter
+ 115 0074 00000000 		.word	-536707064
+ 116 0078 088002E0 		.word	pinState
+ 117 007c 00000000 	.LFE2:
+ 119              		.global	pinState
+ 120              		.bss
+ 121              		.align	2
+ 124              	pinState:
+ 125              		.space	4
+ 126 0000 00000000 		.section	.debug_frame,"",%progbits
+ 170              		.section	.debug_loc,"",%progbits
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:1      .text:00000000 $t
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:16     .text:00000000 digitalWrite
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:50     .text:00000020 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:59     .text:00000028 main
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:56     .text:00000028 $t
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:115    .text:00000074 $d
+C:\Users\ANNIMB~1\AppData\Local\Temp/ccg1aaaa.s:125    .bss:00000000 pinState
+
+UNDEFINED SYMBOLS
+init_VIC
+init_timer
+enable_timer
+timer_counter

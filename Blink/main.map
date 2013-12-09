@@ -1,0 +1,341 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ROM              0x00000000         0x00080000         xr
+RAM              0x40000000         0x00008000         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD ./Src/Startup.o
+LOAD ./Src/swi_handler.o
+LOAD ./Src/irq.o
+LOAD ./Src/target.o
+LOAD ./Src/timer.o
+LOAD ./Src/main.o
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/../../../../arm-elf/lib/thumb/interwork\libc.a
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/../../../../arm-elf/lib/thumb/interwork\libm.a
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/../../../../arm-elf/lib/thumb/interwork\libc.a
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/thumb/interwork\libgcc.a
+START GROUP
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/thumb/interwork\libgcc.a
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/../../../../arm-elf/lib/thumb/interwork\libg.a
+LOAD c:/winarm/winarm/bin/../lib/gcc/arm-elf/4.1.1/../../../../arm-elf/lib/thumb/interwork\libc.a
+END GROUP
+
+.text           0x00000000      0x630
+ *(.vectorg)
+ .vectorg       0x00000000       0x98 ./Src/Startup.o
+                0x00000050                __IRQ_Wrapper
+ .vectorg       0x00000098       0xd0 ./Src/swi_handler.o
+                0x00000098                SoftwareInterrupt
+                0x00000168                . = ALIGN (0x4)
+ *(.init)
+ .init          0x00000168      0x168 ./Src/Startup.o
+                0x00000294                __exit_THUMB
+                0x00000168                __startup
+                0x00000290                __exit_ARM
+ *(.text .text.*)
+ .text          0x000002d0        0x0 ./Src/Startup.o
+ .text          0x000002d0       0x38 ./Src/swi_handler.o
+                0x000002e0                IntGetCPSR
+                0x00000300                FiqDisable
+                0x000002d0                IntRestore
+                0x000002f0                IntDisable
+                0x000002d8                FiqRestore
+                0x000002e8                IntEnable
+                0x000002f8                FiqEnable
+ .text          0x00000308      0x118 ./Src/irq.o
+                0x0000035c                install_irq
+                0x000003c0                uninstall_irq
+                0x00000318                init_VIC
+ .text          0x00000420       0x7c ./Src/target.o
+                0x00000428                TargetInit
+                0x00000424                FIQ_Exception
+                0x0000042c                TargetResetInit
+                0x00000420                IRQ_Exception
+ .text          0x0000049c       0xfc ./Src/timer.o
+                0x00000518                reset_timer
+                0x00000548                init_timer
+                0x000004d0                enable_timer
+                0x000004f4                disable_timer
+ .text          0x00000598       0x80 ./Src/main.o
+                0x00000598                digitalWrite
+                0x000005c0                main
+ *(.gnu.linkonce.t.*)
+ *(.glue_7)
+ .glue_7        0x00000618        0x0 ./Src/Startup.o
+ .glue_7        0x00000618        0x0 ./Src/swi_handler.o
+ .glue_7        0x00000618        0x0 ./Src/irq.o
+ .glue_7        0x00000618        0x0 ./Src/target.o
+ .glue_7        0x00000618        0x0 ./Src/timer.o
+ .glue_7        0x00000618        0x0 ./Src/main.o
+ *(.glue_7t)
+ .glue_7t       0x00000618        0x0 ./Src/Startup.o
+ .glue_7t       0x00000618        0x0 ./Src/swi_handler.o
+ .glue_7t       0x00000618        0x0 ./Src/irq.o
+ .glue_7t       0x00000618        0x0 ./Src/target.o
+ .glue_7t       0x00000618        0x0 ./Src/timer.o
+ .glue_7t       0x00000618       0x18 ./Src/main.o
+                0x00000624                __init_timer_change_to_arm
+                0x00000620                __init_timer_from_thumb
+                0x0000061c                __init_VIC_change_to_arm
+                0x0000062c                __enable_timer_change_to_arm
+                0x00000628                __enable_timer_from_thumb
+                0x00000618                __init_VIC_from_thumb
+ *(.gcc_except_table)
+ *(.rodata)
+ *(.rodata*)
+ *(.gnu.linkonce.r.*)
+                0x00000630                . = ALIGN (0x4)
+                0x00000630                . = ALIGN (0x4)
+
+.ctors          0x00000630        0x0
+                0x00000630                PROVIDE (__ctors_start__, .)
+ *(SORT(.ctors.*))
+ *(.ctors)
+                0x00000630                . = ALIGN (0x4)
+                0x00000630                PROVIDE (__ctors_end__, .)
+                0x00000630                . = ALIGN (0x4)
+
+.dtors          0x00000630        0x0
+                0x00000630                PROVIDE (__dtors_start__, .)
+ *(SORT(.dtors.*))
+ *(.dtors)
+                0x00000630                . = ALIGN (0x4)
+                0x00000630                PROVIDE (__dtors_end__, .)
+                0x00000630                . = ALIGN (0x4)
+                0x00000630                . = ALIGN (0x4)
+                0x00000630                _etext = .
+                0x00000630                PROVIDE (etext, .)
+
+.data           0x40000000        0x0 load address 0x00000630
+                0x40000000                _data = .
+ *(.vectmapped)
+                0x40000000                . = ALIGN (0x4)
+ *(.fastrun)
+                0x40000000                . = ALIGN (0x4)
+                0x40000000                . = ALIGN (0x4)
+ *(.data)
+ .data          0x40000000        0x0 ./Src/Startup.o
+ .data          0x40000000        0x0 ./Src/swi_handler.o
+ .data          0x40000000        0x0 ./Src/irq.o
+ .data          0x40000000        0x0 ./Src/target.o
+ .data          0x40000000        0x0 ./Src/timer.o
+ .data          0x40000000        0x0 ./Src/main.o
+ *(.data.*)
+ *(.gnu.linkonce.d*)
+                0x40000000                . = ALIGN (0x4)
+                0x40000000                . = ALIGN (0x4)
+                0x40000000                _edata = .
+                0x40000000                PROVIDE (edata, .)
+
+.bss            0x40000000        0x8
+                0x40000000                __bss_start = .
+                0x40000000                __bss_start__ = .
+ *(.bss)
+ .bss           0x40000000        0x0 ./Src/Startup.o
+ .bss           0x40000000        0x0 ./Src/swi_handler.o
+ .bss           0x40000000        0x0 ./Src/irq.o
+ .bss           0x40000000        0x0 ./Src/target.o
+ .bss           0x40000000        0x4 ./Src/timer.o
+                0x40000000                timer_counter
+ .bss           0x40000004        0x4 ./Src/main.o
+                0x40000004                pinState
+ *(.gnu.linkonce.b*)
+ *(COMMON)
+                0x40000008                . = ALIGN (0x4)
+                0x40000008                . = ALIGN (0x4)
+                0x40000008                __bss_end__ = .
+                0x40000008                PROVIDE (__bss_end, .)
+
+.stack          0x40000100      0xc00
+ *(.stack)
+ .stack         0x40000100      0xc00 ./Src/Startup.o
+                0x40000d00                PROVIDE (_stack, .)
+                0x40000d00                . = ALIGN (0x4)
+                0x40000d00                _end = .
+                0x40000d00                PROVIDE (end, .)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x00000000       0x6c
+ *(.comment)
+ .comment       0x00000000       0x1b ./Src/irq.o
+ .comment       0x0000001b       0x1b ./Src/target.o
+ .comment       0x00000036       0x1b ./Src/timer.o
+ .comment       0x00000051       0x1b ./Src/main.o
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000       0xd0
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x28 ./Src/Startup.o
+ .debug_aranges
+                0x00000028       0x28 ./Src/swi_handler.o
+ .debug_aranges
+                0x00000050       0x20 ./Src/irq.o
+ .debug_aranges
+                0x00000070       0x20 ./Src/target.o
+ .debug_aranges
+                0x00000090       0x20 ./Src/timer.o
+ .debug_aranges
+                0x000000b0       0x20 ./Src/main.o
+
+.debug_pubnames
+                0x00000000      0x139
+ *(.debug_pubnames)
+ .debug_pubnames
+                0x00000000       0x41 ./Src/irq.o
+ .debug_pubnames
+                0x00000041       0x59 ./Src/target.o
+ .debug_pubnames
+                0x0000009a       0x66 ./Src/timer.o
+ .debug_pubnames
+                0x00000100       0x39 ./Src/main.o
+
+.debug_info     0x00000000      0x471
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000       0x5b ./Src/Startup.o
+ .debug_info    0x0000005b       0x5f ./Src/swi_handler.o
+ .debug_info    0x000000ba      0x141 ./Src/irq.o
+ .debug_info    0x000001fb       0x8e ./Src/target.o
+ .debug_info    0x00000289      0x118 ./Src/timer.o
+ .debug_info    0x000003a1       0xd0 ./Src/main.o
+
+.debug_abbrev   0x00000000      0x284
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000       0x10 ./Src/Startup.o
+ .debug_abbrev  0x00000010       0x10 ./Src/swi_handler.o
+ .debug_abbrev  0x00000020       0xdd ./Src/irq.o
+ .debug_abbrev  0x000000fd       0x34 ./Src/target.o
+ .debug_abbrev  0x00000131       0xa3 ./Src/timer.o
+ .debug_abbrev  0x000001d4       0xb0 ./Src/main.o
+
+.debug_line     0x00000000      0x31b
+ *(.debug_line)
+ .debug_line    0x00000000       0xc1 ./Src/Startup.o
+ .debug_line    0x000000c1       0x98 ./Src/swi_handler.o
+ .debug_line    0x00000159       0x84 ./Src/irq.o
+ .debug_line    0x000001dd       0x58 ./Src/target.o
+ .debug_line    0x00000235       0x75 ./Src/timer.o
+ .debug_line    0x000002aa       0x71 ./Src/main.o
+
+.debug_frame    0x00000000      0x148
+ *(.debug_frame)
+ .debug_frame   0x00000000       0x58 ./Src/irq.o
+ .debug_frame   0x00000058       0x50 ./Src/target.o
+ .debug_frame   0x000000a8       0x68 ./Src/timer.o
+ .debug_frame   0x00000110       0x38 ./Src/main.o
+
+.debug_str      0x00000000      0x1b8
+ *(.debug_str)
+ .debug_str     0x00000000       0xd8 ./Src/irq.o
+                                 0xf1 (size before relaxing)
+ .debug_str     0x000000d8       0x44 ./Src/target.o
+                                 0xc6 (size before relaxing)
+ .debug_str     0x0000011c       0x70 ./Src/timer.o
+                                 0xf8 (size before relaxing)
+ .debug_str     0x0000018c       0x2c ./Src/main.o
+                                 0xca (size before relaxing)
+
+.debug_loc      0x00000000      0x114
+ *(.debug_loc)
+ .debug_loc     0x00000000       0x5b ./Src/irq.o
+ .debug_loc     0x0000005b       0x69 ./Src/timer.o
+ .debug_loc     0x000000c4       0x50 ./Src/main.o
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+OUTPUT(main.elf elf32-littlearm)
+
+Cross Reference Table
+
+Symbol                                            File
+FIQ_Exception                                     ./Src/target.o
+FiqDisable                                        ./Src/swi_handler.o
+FiqEnable                                         ./Src/swi_handler.o
+FiqRestore                                        ./Src/swi_handler.o
+IRQ_Exception                                     ./Src/target.o
+IntDisable                                        ./Src/swi_handler.o
+IntEnable                                         ./Src/swi_handler.o
+IntGetCPSR                                        ./Src/swi_handler.o
+IntRestore                                        ./Src/swi_handler.o
+SoftwareInterrupt                                 ./Src/swi_handler.o
+                                                  ./Src/Startup.o
+TargetInit                                        ./Src/target.o
+TargetResetInit                                   ./Src/target.o
+__IRQ_Wrapper                                     ./Src/Startup.o
+__bss_end__                                       ./Src/Startup.o
+__bss_start__                                     ./Src/Startup.o
+__ctors_end__                                     ./Src/Startup.o
+__ctors_start__                                   ./Src/Startup.o
+__enable_timer_change_to_arm                      ./Src/main.o
+__enable_timer_from_thumb                         ./Src/main.o
+__exit_ARM                                        ./Src/Startup.o
+__exit_THUMB                                      ./Src/Startup.o
+__init_VIC_change_to_arm                          ./Src/main.o
+__init_VIC_from_thumb                             ./Src/main.o
+__init_timer_change_to_arm                        ./Src/main.o
+__init_timer_from_thumb                           ./Src/main.o
+__startup                                         ./Src/Startup.o
+_data                                             ./Src/Startup.o
+_edata                                            ./Src/Startup.o
+_etext                                            ./Src/Startup.o
+digitalWrite                                      ./Src/main.o
+disable_timer                                     ./Src/timer.o
+enable_timer                                      ./Src/timer.o
+                                                  ./Src/main.o
+init_VIC                                          ./Src/irq.o
+                                                  ./Src/main.o
+init_timer                                        ./Src/timer.o
+                                                  ./Src/main.o
+install_irq                                       ./Src/irq.o
+                                                  ./Src/timer.o
+main                                              ./Src/main.o
+                                                  ./Src/Startup.o
+pinState                                          ./Src/main.o
+reset_timer                                       ./Src/timer.o
+timer_counter                                     ./Src/timer.o
+                                                  ./Src/main.o
+uninstall_irq                                     ./Src/irq.o
